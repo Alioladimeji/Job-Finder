@@ -151,7 +151,8 @@ function App () {
   const handleSearch = async filters => {
     try {
       console.log('Searching with filters:', filters);
-      const res = await fetch('http://localhost:8000/api/jobs/', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const res = await fetch(`${apiUrl}/api/jobs/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

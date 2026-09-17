@@ -72,12 +72,43 @@ cd ..
 npm install
 ```
 
-3. **Start the development server:**
+3. **Configure environment variables:**
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and set:
+```
+VITE_API_URL=http://localhost:8000
+```
+
+4. **Start the development server:**
 ```bash
 npm run dev
 ```
 
 The frontend will be available at `http://localhost:5173`
+
+## Deployment
+
+### Deploying to Vercel
+
+1. **Deploy your backend** to a hosting service (Railway, Render, Fly.io, etc.) and note the URL
+
+2. **Configure Vercel environment variable:**
+   - Go to your Vercel project settings
+   - Navigate to "Environment Variables"
+   - Add: `VITE_API_URL` = `https://your-backend-url.com`
+   - Apply to Production, Preview, and Development environments
+
+3. **Deploy to Vercel:**
+```bash
+vercel --prod
+```
+
+Or connect your GitHub repo to Vercel for automatic deployments.
+
+**Important**: The backend URL must be publicly accessible and support CORS from your Vercel domain.
 
 ## Running the Application
 
