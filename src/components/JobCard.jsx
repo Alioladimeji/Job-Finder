@@ -7,6 +7,8 @@ import {
   IconButton,
   Box,
   Tooltip,
+  Chip,
+  Stack,
 } from "@mui/material";
 
 function JobCard({ job, onToggleSave, isSaved }) {
@@ -18,6 +20,9 @@ function JobCard({ job, onToggleSave, isSaved }) {
     e.stopPropagation();
     onToggleSave && onToggleSave(job);
   };
+
+  // Determine which profiles matched this job
+  const matchedProfiles = job.matchedProfiles || (job.profileName ? [job.profileName] : null);
 
   return (
     <Card sx={{ position: "relative" }}>
@@ -62,10 +67,28 @@ function JobCard({ job, onToggleSave, isSaved }) {
               WebkitLineClamp: 3,
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
+              mb: matchedProfiles ? 1 : 0,
             }}
           >
             {job.description}
           </Typography>
+
+          {/* Show matched profiles if available */}
+          {matchedProfiles && matchedProfiles.length > 0 && (
+            <Box sx={{ mt: 1 }}>
+              <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap", gap: 0.5 }}>
+                {matchedProfiles.map((profileName, idx) => (
+                  <Chip
+                    key={idx}
+                    label={profileName}
+                    size="small"
+                    variant="outlined"
+                    sx={{ fontSize: "0.7rem", height: 20 }}
+                  />
+                ))}
+              </Stack>
+            </Box>
+          )}
         </CardContent>
       </CardActionArea>
     </Card>

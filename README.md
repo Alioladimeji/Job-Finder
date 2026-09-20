@@ -5,7 +5,9 @@ A full-stack application for searching and filtering LinkedIn job postings with 
 ## Features
 
 - 🔍 **Advanced Search**: Search by keyword and location
-- 🏷️ **Smart Filtering**: Filter by work modality (Remote, Hybrid, On-site)
+- 📋 **Search Profiles**: Save and manage multiple search configurations (NEW!)
+- 🏷️ **Multi-Location Filtering**: Select any combination of Remote, Hybrid, and On-site (NEW!)
+- 🔄 **Multi-Profile Search**: Search multiple profiles simultaneously with automatic deduplication (NEW!)
 - ⏰ **Time Filters**: Find recent postings (last hour, 24h, etc.)
 - 🚫 **Keyword Exclusion**: Exclude unwanted terms from results
 - 💾 **Save Jobs**: Bookmark jobs for later review
@@ -72,43 +74,12 @@ cd ..
 npm install
 ```
 
-3. **Configure environment variables:**
-```bash
-cp .env.example .env
-```
-
-Edit `.env` and set:
-```
-VITE_API_URL=http://localhost:8000
-```
-
-4. **Start the development server:**
+3. **Start the development server:**
 ```bash
 npm run dev
 ```
 
 The frontend will be available at `http://localhost:5173`
-
-## Deployment
-
-### Deploying to Vercel
-
-1. **Deploy your backend** to a hosting service (Railway, Render, Fly.io, etc.) and note the URL
-
-2. **Configure Vercel environment variable:**
-   - Go to your Vercel project settings
-   - Navigate to "Environment Variables"
-   - Add: `VITE_API_URL` = `https://your-backend-url.com`
-   - Apply to Production, Preview, and Development environments
-
-3. **Deploy to Vercel:**
-```bash
-vercel --prod
-```
-
-Or connect your GitHub repo to Vercel for automatic deployments.
-
-**Important**: The backend URL must be publicly accessible and support CORS from your Vercel domain.
 
 ## Running the Application
 
@@ -144,6 +115,11 @@ Once the backend is running, visit:
 - Requests
 - Python 3.x
 
+## Documentation
+
+- 📖 [User Guide](USER_GUIDE.md) - Learn how to use the new profile features
+- 📊 [Implementation Report](IMPLEMENTATION_REPORT.md) - Technical details of the new features
+
 ## Important Notes
 
 ⚠️ **LinkedIn Anti-Scraping**: LinkedIn actively blocks web scrapers. This application includes:
@@ -155,6 +131,15 @@ For production use, consider:
 - Using LinkedIn's official API
 - Using third-party job aggregation services
 - Implementing proxy rotation
+
+## What's New
+
+### Version 2.0 (Latest)
+- ✨ **Search Profiles**: Create and save multiple search configurations
+- ✨ **Multiple Work Locations**: Select Remote + Hybrid + On-site in any combination
+- ✨ **Multi-Profile Search**: Search multiple profiles at once with smart deduplication
+- ✨ **Profile Management**: Create, edit, duplicate, and delete profiles
+- ✨ **Matched Profile Display**: See which profile(s) matched each job result
 
 ## License
 

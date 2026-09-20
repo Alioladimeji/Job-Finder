@@ -49,8 +49,13 @@ async def search_jobs(request: JobSearchRequest):
         JobSearchResponse with list of jobs
     """
     try:
+        # Backward compatibility: merge modality into modalities
+        modalities = list(request.modalities) if request.modalities else []
+        if request.modality and request.modality not in modalities:
+            modalities.append(request.modality)
+
         logger.info(f"Searching jobs: keyword={request.keyword}, location={request.location}")
-        logger.info(f"Filters: modality={request.modality}, time={request.time_filter}, exclude={request.exclude}")
+        logger.info(f"Filters: modalities={modalities}, time={request.time_filter}, exclude={request.exclude}")
 
         # Validate required fields
         if not request.keyword or request.keyword.strip() == "":
@@ -61,7 +66,7 @@ async def search_jobs(request: JobSearchRequest):
             jobs_data = scraper.scrape_jobs(
                 keyword=request.keyword,
                 location=request.location,
-                modality=request.modality,
+                modalities=modalities,
                 time_filter=request.time_filter,
                 exclude=request.exclude
             )
@@ -114,6 +119,4 @@ async def health_check():
 
 if __name__ == "__main__":
     import uvicorn
-    import os
-    port = int(os.environ.get("PORT", 8000))
-    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

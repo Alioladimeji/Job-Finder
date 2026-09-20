@@ -151,8 +151,71 @@ function App () {
   const handleSearch = async filters => {
     try {
       console.log('Searching with filters:', filters);
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-      const res = await fetch(`${apiUrl}/api/jobs/`, {
+
+      // Handle multiple profile search
+      if (filters.multipleProfiles) {
+        const profiles = filters.multipleProfiles;
+        const allResults = [];
+        const jobMap = new Map(); // For deduplication
+
+        for (const profile of profiles) {
+          const combinedKeywords = profile.includeKeywords.join(' OR ');
+          const searchRequest = {
+            keyword: combinedKeywords,
+            location: profile.location,
+            exclude: profile.excludeKeywords,
+            modalities: profile.workLocations,
+            time_filter: profile.postingAge,
+          };
+
+          try {
+            const res = await fetch('http://localhost:8000/api/jobs/', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(searchRequest)
+            });
+
+            if (res.ok) {
+              const data = await res.json();
+              const results = data.results || [];
+
+              // Add profile name to each job and deduplicate
+              results.forEach(job => {
+                const jobId = job.link || job.title;
+                if (jobMap.has(jobId)) {
+                  // Job already exists, add this profile to matched profiles
+                  const existingJob = jobMap.get(jobId);
+                  existingJob.matchedProfiles = existingJob.matchedProfiles || [existingJob.profileName];
+                  if (!existingJob.matchedProfiles.includes(profile.name)) {
+                    existingJob.matchedProfiles.push(profile.name);
+                  }
+                } else {
+                  // New job
+                  jobMap.set(jobId, { ...job, profileName: profile.name });
+                }
+              });
+            }
+          } catch (err) {
+            console.error(`Error searching profile ${profile.name}:`, err);
+          }
+        }
+
+        const combinedJobs = Array.from(jobMap.values());
+
+        if (combinedJobs.length === 0) {
+          setJobs([]);
+          setNoResultsMessage('No results found from any selected profile');
+          setErrorMessage('');
+        } else {
+          setJobs(combinedJobs);
+          setNoResultsMessage('');
+          setErrorMessage('');
+        }
+        return;
+      }
+
+      // Single search request
+      const res = await fetch('http://localhost:8000/api/jobs/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -176,7 +239,12 @@ function App () {
         setNoResultsMessage(data.message || 'No results found')
         setErrorMessage('')
       } else {
-        setJobs(data.results || data || [])
+        const results = data.results || data || [];
+        // Add profile name if single profile search
+        const jobsWithProfile = filters.profileName
+          ? results.map(job => ({ ...job, profileName: filters.profileName }))
+          : results;
+        setJobs(jobsWithProfile)
         setNoResultsMessage('')
         setErrorMessage('')
       }

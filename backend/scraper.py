@@ -18,7 +18,7 @@ class LinkedInScraper:
             'Upgrade-Insecure-Requests': '1'
         }
 
-    def build_search_url(self, keyword: str, location: str, modality: str, time_filter: str) -> str:
+    def build_search_url(self, keyword: str, location: str, modalities: List[str], time_filter: str) -> str:
         """Build LinkedIn job search URL with filters"""
         params = {
             'keywords': keyword,
@@ -26,14 +26,18 @@ class LinkedInScraper:
         }
 
         # Add modality filter (LinkedIn's f_WT parameter)
-        # 1 = Remote, 2 = On-site, 3 = Hybrid
+        # 1 = On-site, 2 = Remote, 3 = Hybrid
         modality_map = {
             'remoto': '2',  # Remote
             'presencial': '1',  # On-site
             'hibrido': '3'  # Hybrid
         }
-        if modality and modality in modality_map:
-            params['f_WT'] = modality_map[modality]
+
+        # Support multiple modalities - LinkedIn accepts comma-separated values
+        if modalities:
+            valid_codes = [modality_map[m] for m in modalities if m in modality_map]
+            if valid_codes:
+                params['f_WT'] = '%2C'.join(valid_codes)  # URL-encoded comma
 
         # Add time filter (LinkedIn's f_TPR parameter)
         # r86400 = Past 24 hours, r604800 = Past week, r2592000 = Past month
@@ -50,7 +54,7 @@ class LinkedInScraper:
         query_string = urllib.parse.urlencode(params)
         return f"{self.base_url}?{query_string}"
 
-    def scrape_jobs(self, keyword: str, location: str = "", modality: str = "",
+    def scrape_jobs(self, keyword: str, location: str = "", modalities: List[str] = None,
                     time_filter: str = "", exclude: List[str] = None) -> List[Dict]:
         """
         Scrape LinkedIn jobs based on search parameters
@@ -58,7 +62,7 @@ class LinkedInScraper:
         Args:
             keyword: Job search keyword
             location: Job location
-            modality: Remote/hybrid/on-site
+            modalities: List of work location types (remote/hybrid/on-site)
             time_filter: Time range filter
             exclude: List of words to exclude from results
 
@@ -67,8 +71,10 @@ class LinkedInScraper:
         """
         if exclude is None:
             exclude = []
+        if modalities is None:
+            modalities = []
 
-        url = self.build_search_url(keyword, location, modality, time_filter)
+        url = self.build_search_url(keyword, location, modalities, time_filter)
 
         try:
             response = requests.get(url, headers=self.headers, timeout=10)
