@@ -95,7 +95,9 @@ class LinkedInScraper:
                 try:
                     job = self._extract_job_info(card)
                     if job and not self._should_exclude(job, exclude):
-                        jobs.append(job)
+                        # Apply modality filter (client-side backup)
+                        if self._matches_modality_filter(job, modalities):
+                            jobs.append(job)
                 except Exception as e:
                     print(f"Error extracting job: {e}")
                     continue
@@ -161,6 +163,44 @@ class LinkedInScraper:
                 return True
 
         return False
+
+    def _matches_modality_filter(self, job: Dict, modalities: List[str]) -> bool:
+        """
+        Check if job matches the selected work location modalities.
+        This is a client-side filter backup for when LinkedIn doesn't respect URL parameters.
+        """
+        if not modalities:
+            return True  # No filter applied
+
+        # Combine title, location, and description for checking
+        search_text = f"{job.get('title', '')} {job.get('location', '')} {job.get('description', '')}".lower()
+
+        # Keywords that indicate each modality
+        remote_keywords = ['remote', 'remoto', 'trabajo remoto', 'desde casa', 'home office', 'work from home', 'wfh']
+        hybrid_keywords = ['hybrid', 'híbrido', 'hibrido', 'semi-presencial', 'semi presencial']
+        onsite_keywords = ['on-site', 'onsite', 'presencial', 'oficina', 'office', 'in-office']
+
+        matched = False
+
+        if 'remoto' in modalities:
+            if any(keyword in search_text for keyword in remote_keywords):
+                matched = True
+
+        if 'hibrido' in modalities:
+            if any(keyword in search_text for keyword in hybrid_keywords):
+                matched = True
+
+        if 'presencial' in modalities:
+            # For on-site, we check if it's explicitly mentioned OR if it's NOT remote/hybrid
+            has_remote = any(keyword in search_text for keyword in remote_keywords)
+            has_hybrid = any(keyword in search_text for keyword in hybrid_keywords)
+            has_onsite = any(keyword in search_text for keyword in onsite_keywords)
+
+            # Consider it on-site if explicitly mentioned OR if no modality is mentioned
+            if has_onsite or (not has_remote and not has_hybrid):
+                matched = True
+
+        return matched
 
 
 # Fallback: Mock data generator for testing
