@@ -151,6 +151,7 @@ function App () {
   const handleSearch = async filters => {
     try {
       console.log('Searching with filters:', filters);
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
       // Handle multiple profile search
       if (filters.multipleProfiles) {
@@ -169,7 +170,7 @@ function App () {
           };
 
           try {
-            const res = await fetch('http://localhost:8000/api/jobs/', {
+            const res = await fetch(`${apiUrl}/api/jobs/`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(searchRequest)
@@ -215,7 +216,7 @@ function App () {
       }
 
       // Single search request
-      const res = await fetch('http://localhost:8000/api/jobs/', {
+      const res = await fetch(`${apiUrl}/api/jobs/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
